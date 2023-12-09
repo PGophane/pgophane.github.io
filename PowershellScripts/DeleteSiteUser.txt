@@ -1,0 +1,18 @@
+﻿If ((Get-PSSnapIn -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
+{
+    Add-PSSnapIn -Name Microsoft.SharePoint.PowerShell    
+}
+cls
+$URL="<Site URL>"
+$users = "<domainname\Username>"
+
+
+$web = Get-SPWeb $URL
+
+foreach ($element in $users) 
+{
+	write-host $element
+    [Microsoft.SharePoint.SPUser]$user = $web.EnsureUser($element)
+    Get-SPSite $URL | Get-SPWeb |Remove-SPUser $user -confirm:$false 
+}
+write-host "DONE!!!"
