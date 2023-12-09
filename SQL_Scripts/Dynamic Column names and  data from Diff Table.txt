@@ -1,0 +1,27 @@
+
+-- ==============Get actual data and headers from different tables =============
+CREATE PROCEDURE [dbo].[SP_getDataWithDynamicHeader]
+
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON
+
+    DECLARE @SQLText NVARCHAR(MAX) = ''
+
+	SELECT  @SQLText += 'SELECT '
+
+	SELECT  @SQLText += ( -- Add in column list, with dynamic column names.
+					SELECT  CONVERT(VARCHAR, column_Number) + ' AS [' + column_Title + '],'
+					FROM    tblColMapping
+					FOR XML PATH('')
+				)
+
+	SELECT  @SQLText = LEFT(@SQLText, LEN(@SQLText) - 1) + ' ' -- Remove trailing comma
+
+	SELECT  @SQLText += 'FROM tblData' --WHERE columnName if any = ''' + @Type + ''''
+
+	PRINT   @SQLText
+	EXEC    sp_executesql @SQLText
+END

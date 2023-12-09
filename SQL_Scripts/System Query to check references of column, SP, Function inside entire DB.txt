@@ -1,0 +1,6 @@
+/*------------------ System Query to check references of column, SP, Function inside entire DB ------------------------------------------*/
+SELECT DISTINCT OBJECT_NAME(OBJECT_ID),
+object_definition(OBJECT_ID)
+FROM sys.Procedures
+WHERE object_definition(OBJECT_ID) LIKE '%' + 'ufn_Delimited?String' + '%'
+/*------------------ End System Query to check references of column, SP, Function inside entire DB --------------------------------------*/

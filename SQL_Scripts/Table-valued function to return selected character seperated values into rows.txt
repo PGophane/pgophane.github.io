@@ -1,0 +1,21 @@
+/*------------------ Table-valued function to return '?' seperated values into rows -----------------------------------*/
+CREATE FUNCTION [dbo].[ufn_Delimited?String] (@val nvarchar(max))
+RETURNS @tblValues TABLE (val nvarchar(max))
+BEGIN
+	DECLARE	@x int = 1
+	DECLARE	@y int = CHARINDEX('?', @val)
+						
+	WHILE @x < LEN(@val) + 1
+	BEGIN
+		IF @y = 0
+			BEGIN
+				SET @y = LEN(@val) + 1
+			END
+		INSERT INTO @tblValues (val) VALUES (SUBSTRING(@val, @x, @y - @x))
+		SET @x = @y + 1
+		SET @y = CHARINDEX('?', @val, @x)
+	END
+	RETURN
+
+	-- select * from [ufn_Delimited?String]('ass, asas ?sddsd')
+END

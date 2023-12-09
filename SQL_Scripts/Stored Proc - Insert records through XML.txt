@@ -1,0 +1,78 @@
+/*------------------ Stored Proc - Insert records through XML----------------------------------------*/
+--Declare @XMLdoc NVARCHAR(MAX)
+--Set @XMLdoc='<?xml version="1.0"?>
+--<RepresentativeGrid
+--	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+--	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+--	<RepCode>string</RepCode>
+--	<DealerId>0</DealerId>
+--	<LocationId>0</LocationId>
+--	<CustomerID>string</CustomerID>
+--	<EffectiveStartDate>2022-07-25T09:29:46.161Z</EffectiveStartDate>
+--	<EffectiveEndDate>2022-07-25T09:29:46.161Z</EffectiveEndDate>
+--</RepresentativeGrid>'
+
+ALTER   PROCEDURE [dbo].[sp_CreateRepcodeDetailsXML] 
+	@XMLdoc NVARCHAR(MAX)
+	
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@ErrNumber NVARCHAR(50)
+		,@ErrDescription NVARCHAR(4000)
+		,@ErrState INT
+		,@ErrSeverity INT
+		,@ErrLine INT
+		,@ErrTime DATETIME
+	BEGIN TRANSACTION
+	BEGIN TRY
+
+	DECLARE @index INT,@RepcodeId INT,@Id INT
+	EXEC sp_xml_preparedocument @index OUTPUT, @XMLdoc
+
+	SET @Id=(SELECT Id FROM OPENXML(@index,'RepresentativeGrid') WITH (Id int 'Id'))
+
+	UPDATE RepCode_to_Dealer set EffectiveEndDate=GETDATE()-1 where Id=@Id
+
+		INSERT INTO RepCode_to_Dealer(RepCode,DealerId,LocationId,EffectiveStartDate,EffectiveEndDate)
+		Select RepCode,DealerId,LocationId,EffectiveStartDate,EffectiveEndDate 
+				FROM OPENXML (@index, 'RepresentativeGrid')
+				WITH 
+				(
+				
+				RepCode				    varchar(1000)  'RepCode',
+				DealerId				varchar(10)  'DealerId',
+				LocationId				INT  'LocationId',
+				EffectiveStartDate	    DateTime  'EffectiveStartDate',
+				EffectiveEndDate	    DateTime  'EffectiveEndDate'
+				) as jsondata
+
+				SET @RepcodeId = @@IDENTITY
+				SELECT Isnull(@RepcodeId,0) as Id
+					print 'END'		
+			
+				
+		COMMIT TRANSACTION
+	END TRY
+		BEGIN CATCH
+				ROLLBACK TRANSACTION
+				SET @ErrNumber = ERROR_NUMBER()
+				SET @ErrDescription = ERROR_MESSAGE()
+				SET @ErrState = ERROR_STATE()
+				SET @ErrSeverity = ERROR_SEVERITY()
+				SET @ErrLine = ERROR_LINE()
+				SET @ErrTime = GETDATE()
+
+				EXEC [dbo].[ErrorLogInsert] @ErrorNumber = @ErrNumber
+					,@ErrorDescription = @ErrDescription
+					,@ErrorProcedure = 'sp_CreateRepcodeDetailsXML'
+					,@ErrorState = @ErrState
+					,@ErrorSeverity = @ErrSeverity
+					,@ErrorLine = @ErrLine
+					,@ErrorTime = @ErrTime
+					select 0 as Id
+				
+		END CATCH
+END
+/*------------------ End Stored Proc - Insert records through XML----------------------------------------*/
