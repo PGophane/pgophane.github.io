@@ -1,0 +1,18 @@
+﻿If ((Get-PSSnapIn -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
+{
+    Add-PSSnapIn -Name Microsoft.SharePoint.PowerShell    
+}
+
+
+ $weburl = "http://<baseURL>/AAR"
+ 
+
+$spWeb = Get-SPWeb($weburl)
+$spFile = $spWeb.GetFile($weburl+"/default.aspx")
+$spFile.CheckOut("Online",$null)
+$spFile.Properties["PublishingPageLayout"] = "/_catalogs/masterpage/Treasure-Inner-Page-50-50.aspx, Treasure-Inner-Page-50-50"
+$spFile.Update()
+$spFile.CheckIn("Update page layout",[Microsoft.SharePoint.SPCheckinType]::MajorCheckIn)
+$spWeb.Dispose()
+Write-Host  "DONE !!!"
+
