@@ -1,0 +1,66 @@
+Add-PSSnapin Microsoft.SharePoint.PowerShell –ErrorAction SilentlyContinue
+  
+#Variables
+$SiteUrl = "http://<baseUrl>/finance/cpu"
+$ListName = "New Supplier Request Form (CPU12)"
+$OutPutFile = "D:\MigrationInputs\ListStructure\NewSupplierRequestForm_CPU12.csv"
+  
+#Get Web and List
+$web = Get-SPWeb $SiteUrl
+$List = $Web.Lists[$ListName]
+Write-host "Total Number of Items Found:"$List.Itemcount
+ 
+Function GetUserEmail($UserValue) {
+    try {
+        #Uservalue: E.g: "1;#user name";
+        $arr = $UserValue.Split(";#");
+        $UserID = $arr[0];
+        $user = $web.SiteUsers.GetById($UserId); 
+        #the above line returns: SPUser Object
+
+        return $user.Email
+    }
+    catch {
+        return $UserValue
+    }
+    
+}
+
+#Array to Hold Result - PSObjects
+$ListItemCollection = @()
+   
+#Get All List items 
+$List.Items | ForEach {
+    #write-host "Processing Item ID:"$_["ID"]
+  
+    $ExportItem = New-Object PSObject 
+    #Get Each field
+    foreach ($Field in $_.Fields) {
+        #Write-Host "Filed Name: " $Field.InternalName "Filed Type: " $Field.Type
+        if ($Field.Type -eq "User") {
+            
+            $CreatorMail = GetUserEmail($_[$Field.InternalName])
+            $ExportItem | Add-Member -MemberType NoteProperty -name $Field.InternalName -value $CreatorMail
+        }
+        elseif ($Field.Type -eq "DateTime") {
+            
+            $local_Date = $_[$Field.InternalName]
+            
+            $ExportItem | Add-Member -MemberType NoteProperty -name $Field.InternalName -value $local_Date
+        } 
+        else {
+            $ExportItem | Add-Member -MemberType NoteProperty -name $Field.InternalName -value $_[$Field.InternalName]
+        }
+        
+    }
+    #Add the object with property to an Array
+    $ListItemCollection += $ExportItem 
+    # Write-host $ExportItem  
+    # Write-host "\n"
+    # Write-host "##############################################################"
+    #break
+    #return 0
+}    
+#Export the result Array to CSV file
+$ListItemCollection | Export-CSV $OutPutFile -NoTypeInformation
+Write-host -f Green "List '$ListName' Exported to $($OutputFile) for site $($SiteURL)"
