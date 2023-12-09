@@ -1,0 +1,40 @@
+﻿$spWeb = Get-SPWeb -Identity http://<baseURL>/sites/Vendorcontracts
+$spList = $spWeb.Lists["ContractMetadataList"]
+$spEventReceiver = $spList.EventReceivers.Add()
+$spEventReceiver.Assembly = "company.Portal.VendorContracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=201bb7be52fac24e"
+$spEventReceiver.Class = "company.Portal.VendorContracts.VerifyERAattachedOnContractList"
+$spEventReceiver.Type = 10001
+$spEventReceiver.SequenceNumber = 1001
+$spEventReceiver.Synchronization = 2
+$spEventReceiver.Update()
+
+
+$spWeb = Get-SPWeb -Identity http://<baseURL>/sites/Vendorcontracts
+$spList = $spWeb.Lists["Office Services Contract"]
+$spEventReceiver = $spList.EventReceivers.Add()
+$spEventReceiver.Assembly = "company.Portal.VendorContracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=201bb7be52fac24e"
+$spEventReceiver.Class = "company.Portal.VendorContracts.ContractUniqueIDGeneration"
+$spEventReceiver.Type = 10001
+$spEventReceiver.SequenceNumber = 1001
+$spEventReceiver.Synchronization = 2
+$spEventReceiver.Update()
+
+$spWeb = Get-SPWeb -Identity http://<baseURL>/sites/Vendorcontracts
+$spList = $spWeb.Lists["Project Capex"]
+$spEventReceiver = $spList.EventReceivers.Add()
+$spEventReceiver.Assembly = "company.Portal.VendorContracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=201bb7be52fac24e"
+$spEventReceiver.Class = "company.Portal.VendorContracts.ContractUniqueIDGeneration"
+$spEventReceiver.Type = 10001
+$spEventReceiver.SequenceNumber = 1001
+$spEventReceiver.Synchronization = 2
+$spEventReceiver.Update()
+
+$spWeb = Get-SPWeb -Identity http://<baseURL>/sites/Vendorcontracts
+$spList = $spWeb.Lists["Rate Contract"]
+$spEventReceiver = $spList.EventReceivers.Add()
+$spEventReceiver.Assembly = "company.Portal.VendorContracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=201bb7be52fac24e"
+$spEventReceiver.Class = "company.Portal.VendorContracts.ContractUniqueIDGeneration"
+$spEventReceiver.Type = 10001
+$spEventReceiver.SequenceNumber = 1001
+$spEventReceiver.Synchronization = 2
+$spEventReceiver.Update()
