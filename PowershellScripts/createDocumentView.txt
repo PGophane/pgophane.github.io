@@ -1,0 +1,51 @@
+﻿If ((Get-PSSnapIn -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
+{
+    Add-PSSnapIn -Name Microsoft.SharePoint.PowerShell    
+}
+cls
+
+$web = Get-SPWeb http://<baseURL>/Marketing
+
+$list = $web.Lists["Marketing Contacts"]                             
+
+write-host $web.Title
+write-host $lists.Count
+write-host $lists.Title
+
+$SourceView="All Documents"
+$NewViewName1="AllItems1"
+$NewViewDefault=$true    
+
+
+$view = $list.Views[$SourceView]  
+$Viewfields = $list.Views[$SourceView].ViewFields.ToStringCollection()  
+$viewRowLimit="30" 
+$viewPaged=$true 
+$viewDefaultView=$NewViewDefault              
+$viewQuery = "" 
+$viewName = $NewViewName1              
+$myListView = $list.Views.Add($viewName, $viewFields, $viewQuery, 30, $true, $false, "HTML", $false)               
+$myListView.DefaultView = $true     
+$myListView.Update()      
+$list.Update() 
+
+$List.Views.Delete($view.ID)
+$list.Update() 
+
+$SourceView="AllItems1"
+$NewViewName2="AllItems"
+$view = $list.Views[$SourceView]  
+$Viewfields = $list.Views[$SourceView].ViewFields.ToStringCollection()  
+$viewRowLimit="30" 
+$viewPaged=$true 
+$viewDefaultView=$NewViewDefault              
+$viewQuery = "" 
+$viewName = $NewViewName2             
+$myListView = $list.Views.Add($viewName, $viewFields, $viewQuery, 30, $true, $false, "HTML", $false)               
+$myListView.DefaultView = $true     
+$myListView.Update()      
+$list.Update() 
+
+$List.Views.Delete($view.ID)
+$list.Update() 
+write-host "DONE !!!"
